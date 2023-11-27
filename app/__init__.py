@@ -4,17 +4,21 @@ import os, re
 from flask_restful import Api
 from app.resources.user import User,WechatLogin
 from app.resources.images import Images
+from pymongo import MongoClient
+
 
 app = Flask(__name__)
-api = Api(app)
+# MongoDB 连接配置
+app.config["MONGO_URI"] = "mongodb://localhost:27017/BackendDB"
 
-api.add_resource(User, '/user/<int:user_id>')
-api.add_resource(WechatLogin, '/wechat_login')
-api.add_resource(Images, '/images')
+# 创建 MongoDB 客户端实例
+mongo = MongoClient(app.config["MONGO_URI"])
+
+# 选择数据库
+db = mongo.BackendDB
 
 
-# if __name__ == "__main__":
-#     app.run(host="0.0.0.0", port=8080, debug=True)
+
 
 
 from app import routes

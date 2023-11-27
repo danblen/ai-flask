@@ -2,6 +2,12 @@ from flask_restful import Resource, reqparse
 import requests
 import json
 from datetime import date
+from bson.json_util import dumps
+from bson.objectid import ObjectId
+from pymongo import MongoClient
+
+mongo = MongoClient("mongodb://localhost:27017/")
+db = mongo.YourDatabaseName
 
 class WechatLogin(Resource):
     def post(self):
@@ -61,5 +67,18 @@ class WechatLogin(Resource):
 
 
 class User(Resource):
-    def get(self):
-        return {'hello': 'world'}
+    def get(self, user_id):
+        try:
+            # ObjectId用于处理MongoDB中的默认_id格式
+            user = db.users.find_one({"_id": ObjectId(user_id)})
+        except Exception as e:
+            return {'error': str(e)}, 400
+
+        if user:
+            # 将MongoDB对象转换为JSON
+            user_json = json.loads(dumps(user))
+            return user_json, 200
+        else:
+            return {'message': 'User not found'}, 404
+        
+        

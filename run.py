@@ -11,5 +11,5 @@ if __name__ == '__main__':
     # 设置环境变量（仅适用于开发环境）
     os.environ['FLASK_ENV'] = 'development'
 
-    startup_tasks()
+    # startup_tasks()
     # app.run(host="0.0.0.0", port=8080, debug=True)
