@@ -9,7 +9,7 @@ from pymongo import MongoClient
 
 app = Flask(__name__)
 # MongoDB 连接配置
-app.config["MONGO_URI"] = "mongodb://localhost:27017/BackendDB"
+app.config["MONGO_URI"] = "mongodb://localhost:27017/myapp"
 
 # 创建 MongoDB 客户端实例
 mongo = MongoClient(app.config["MONGO_URI"])

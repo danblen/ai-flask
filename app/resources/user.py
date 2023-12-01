@@ -7,13 +7,14 @@ from bson.objectid import ObjectId
 from pymongo import MongoClient
 
 mongo = MongoClient("mongodb://localhost:27017/")
-db = mongo.YourDatabaseName
+db = mongo.myapp
 
 class WechatLogin(Resource):
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('code', required=True, type=str, help='Code cannot be blank')
         args = parser.parse_args()
+        print(111111111)
         code = args['code']
 
         # 向微信服务器发送请求以获取访问令牌和用户信息
