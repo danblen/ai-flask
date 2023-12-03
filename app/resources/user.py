@@ -5,13 +5,17 @@ from datetime import datetime, date
 from bson.json_util import dumps
 from bson.objectid import ObjectId
 from pymongo import MongoClient
+from config import read_config
+
 
 mongo = MongoClient("mongodb://localhost:27017/")
 db = mongo.myapp
 
+# 读取配置文件
+config_data = read_config()
 wxConfig = {
-    "appid": "wx3e67e2268416075f",
-    "secret": "c49ae70f9b671c074c3f684687c27177",
+    "appid": config_data["appId"],
+    "secret": config_data["secret"],
     "url": "https://api.weixin.qq.com/sns/jscode2session",
     "grant_type": "authorization_code",
 }
