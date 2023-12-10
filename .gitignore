@@ -4,3 +4,5 @@ __pycache__/
 instance/
 .env
 config/config.ini
+sd_make_images
+user-data.db

@@ -39,7 +39,6 @@ class WechatLogin(Resource):
         }
         wechat_response = requests.get(wxConfig["url"], params=wechat_params)
         wechat_data = wechat_response.json()
-        print(111, code, wechat_data)
 
         # 在这里处理微信服务器返回的数据，包括访问令牌和用户信息
         session_key = wechat_data.get("session_key")
@@ -51,23 +50,15 @@ class WechatLogin(Resource):
         # if not exist in database,  insert into database otherwise update database
         if not user:
             # 用户不存在，创建新用户
-            new_user_id = users_collection.insert_one(
-                {
-                    "user_id": openid,
-                    "points": 5,
-                    "is_check": False,
-                    # 其他需要的字段
-                }
-            ).inserted_id
-            user = users_collection.find_one({"_id": new_user_id})
-            response_data = {
-                "session_key": session_key,
-                "user": {
-                    "user_id": openid,
-                    "points": 5,
-                    "is_check": False,
-                },
+            default_user = {
+                "user_id": openid,
+                "points": 5,
+                "is_check": False,
             }
+            new_user_id = users_collection.insert_one(default_user).inserted_id
+            user = users_collection.find_one({"_id": new_user_id})
+            print(user)
+            response_data = {"code": 200, "session_key": session_key, "user": user}
         else:
             # 用户存在，更新用户信息
             users_collection.update_one(
@@ -82,12 +73,9 @@ class WechatLogin(Resource):
             )
             user = users_collection.find_one({"_id": user["_id"]})
             response_data = {
+                "code": 200,
                 "session_key": session_key,
-                "user": {
-                    "user_id": openid,
-                    "points": user["points"],
-                    "is_check": user["is_check"],
-                },
+                "user": user,
             }
 
         # 假设您有一个方法来处理和返回用户信息
