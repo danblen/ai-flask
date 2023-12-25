@@ -1,7 +1,8 @@
 from .database import engine, Base
 from .database import SessionLocal
 from .sql_model import UserSqlData, UserInfo
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, attributes
+from sqlalchemy.orm import class_mapper
 from .sql_model import PhotoImage
 from PIL import Image
 import os
@@ -13,7 +14,7 @@ from flask_restful import Resource, reqparse
 import time
 import datetime
 from datetime import datetime
-from flask import Flask, request
+from flask import Flask, request,jsonify
 import requests
 
 project_root = "/home/ubuntu/code/ai-flask"
@@ -45,12 +46,23 @@ def is_base64_data_uri(s):
     else:
         return False, s  # 保持原始的 s 不变
 
+def serialize_query_result(query_result, orm_class):
+    serialized_result = []
+    for item in query_result:
+        item_dict = {}
+        for column in class_mapper(orm_class).columns:
+            if isinstance(getattr(item, column.key), datetime):
+                item_dict[column.key] = getattr(item, column.key).strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                item_dict[column.key] = getattr(item, column.key)
+        serialized_result.append(item_dict)
+    return serialized_result
 
 def save_image_to_sql(request):
     db = SessionLocal()
     try:
-        print("save_image_to_sql 获取数据库信息：", request.get("request_id"))
-        # print("save_image_to_sql 获取数据库信息：", request.get("result"))
+        print("save image to sql 获取数据库信息：", request.get("request_id"))
+        # print("save image to sql 获取数据库信息：", request.get("result"))
 
         records = (
             db.query(UserSqlData)
@@ -81,11 +93,11 @@ def save_image_to_sql(request):
                     record.request_status = request.get("status")
                     record.befor_process_time = request.get("befor_process_time")
                     record.process_time = request.get("process_time")
-                    if records_user_info:
+                    if not records_user_info:
                         for record_user in records_user_info:
-                            record_user.points         = record_user.points - 1
-                    #         record_user.finished_works = record_user.finished_works + 1
-                    #         record_user.pending_works  = record_user.pending_works - 1
+                            record_user.points = record_user.points - 1
+                            record_user.finished_works.append(record.output_image_path)
+                            record_user.pending_works  = record_user.pending_works - 1
                 # 提交更新到数据库
                 db.commit()
                 print("输出图像成功")
@@ -215,10 +227,10 @@ def update_user_info_sql(args, request_id):
             img2imgreq_data=json_string,
         )
 
-        # records_user_info = db.query(UserInfo).filter(UserInfo.user_id == user_id).all()
-        # if records_user_info:
-        #     for record_user in records_user_info:
-        #         record_user.pending_works = record_user.pending_works + 1
+        records_user_info = db.query(UserInfo).filter(UserInfo.user_id == user_id).all()
+        if not records_user_info:
+            for record_user in records_user_info:
+                record_user.pending_works = record_user.pending_works + 1
         db.add(db_task)
         db.commit()
         if db_task.user_id:
@@ -269,6 +281,7 @@ def find_images_in_directory(directory, db: Session):
 
 def query_sql_data_by_dict(query: dict):
     db = SessionLocal()
+    print("query_sql_data_by_dict", query)
     try:
         # 构建查询条件
         filters = []
@@ -283,12 +296,15 @@ def query_sql_data_by_dict(query: dict):
             db.close()
             return None
 
+        serialized_result = serialize_query_result(query_result, UserSqlData)
+
         db.close()
-        return query_result
+        return serialized_result
     except Exception as e:
         # 处理数据库查询错误
         print("查询数据时发生错误：", str(e))
         db.close()
+        raise(e)
         return None
 
 
@@ -308,8 +324,10 @@ def query_photo_image_sql_data_by_dict(query: dict):
             db.close()
             return None
 
+        serialized_result = serialize_query_result(query_result, PhotoImage)
+
         db.close()
-        return query_result
+        return serialized_result
     except Exception as e:
         print("查询数据时发生错误：", str(e))
         db.close()
@@ -340,9 +358,32 @@ def queue_process_api(args):
 
 def queue_query_result(query: dict):
     response = forward_to_gpu(query, "/sdapi/v1/queue-query-result")
-    save_image_to_sql(response)
+    if response.get("status") == "finishing":
+        save_image_to_sql(response)
     return response
 
+# def query_finished_works(url: str):
+#     db = SessionLocal()
+#     try:
+#         query_result = db.query(UserInfo).filter(UserInfo.finished_works.contains([url])).all()
+
+#         if not query_result:
+#             print("没有找到数据", query_result)
+#             db.close()
+#             return None
+
+#         db.close()
+#         return query_result
+#     except Exception as e:
+#         print("查询数据时发生错误：", str(e))
+#         db.close()
+#         return None
+
+# class QueryUserFinishedWorksAPI(Resource):
+#     def post(self):
+#         data = request.json
+#         print("QueryUserFinishedWorksAPI", data)
+#         return query_finished_works(data)
 
 class QueueProcessAPI(Resource):
     def post(self):
@@ -357,11 +398,37 @@ class QueryResultAPI(Resource):
         return queue_query_result(data)
 
 
-class QueryUserDataAPI(Resource):
+class QueryUserPcocessDataAPI(Resource):
     def post(self):
         data = request.json
-        print("QueryUserDataAPI", data)
+        print("QueryUserPcocessDataAPI", data)
         return query_sql_data_by_dict(data)
+
+
+    # try:
+    #     # 构建查询条件
+    #     filters = []
+    #     for key, value in query.items():
+    #         filters.append(getattr(UserSqlData, key) == value)
+
+    #     # 执行查询
+    #     query_result = db.query(UserSqlData).filter(*filters).all()
+
+    #     if not query_result:
+    #         print("没有找到数据", query_result)
+    #         db.close()
+    #         return None
+
+    #     serialized_result = serialize_query_result(query_result, UserSqlData)
+
+    #     db.close()
+    #     return serialized_result
+    # except Exception as e:
+    #     # 处理数据库查询错误
+    #     print("查询数据时发生错误：", str(e))
+    #     db.close()
+    #     raise(e)
+    #     return None
 
 
 class QueryPhotoImagesAPI(Resource):

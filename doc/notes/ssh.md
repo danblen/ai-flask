@@ -1,0 +1,1 @@
+生成sshkey复制到服务器可以免密码vscode连接ssh服务器

@@ -55,8 +55,8 @@ class WechatLogin(Resource):
                 "points": 5,
                 "is_check": False,
             }
-            new_user_id = users_collection.insert_one(default_user).inserted_id
-            user = users_collection.find_one({"_id": new_user_id})
+            new_user_id = users_collection.insert_one(default_user).user_id
+            user = users_collection.find_one({"user_id": new_user_id})
             print(user)
             response_data = {"code": 200, "session_key": session_key, "user": user}
         else:
@@ -71,7 +71,7 @@ class WechatLogin(Resource):
                     }
                 },
             )
-            user = users_collection.find_one({"_id": user["_id"]})
+            user = users_collection.find_one({"user_id": user["user_id"]})
             response_data = {
                 "code": 200,
                 "session_key": session_key,

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export FLASK_APP=run.py
+export FLASK_APP=app.py
 export FLASK_ENV=development
 
 # 在启动之前执行的其他命令

@@ -1,5 +1,15 @@
 # models.py
-from sqlalchemy import Column, Integer, String, Text, DateTime, Float, func, Boolean
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    ARRAY,
+    Text,
+    DateTime,
+    Float,
+    func,
+    Boolean,
+)
 from .database import Base
 from sqlalchemy import event
 from datetime import datetime
@@ -35,8 +45,8 @@ class UserInfo(Base):
     history_operations = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
     last_login_at = Column(DateTime)
-    finished_works = Column(String)  # 存放已完成作品的 URL，你也可以使用其他方式存储
-    pending_works = Column(String)
+    finished_works = Column(ARRAY(String))  # 存放已完成作品的 URL，你也可以使用其他方式存储
+    pending_works = Column(Integer)
     is_check = Column(String)
 
 

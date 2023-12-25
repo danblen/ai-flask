@@ -2,7 +2,9 @@ venv/
 *.pyc
 __pycache__/
 instance/
-.env
 config/config.ini
 sd_make_images
 user-data.db
+static
+.vscode
+nohup.out

@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_restful import Api, Resource
 import os
 
-static_directory = "/home/ubuntu/static/"
+static_directory = "/home/ubuntu/code/ai-flask/static/"
 
 class Images(Resource):
     def get(self):
@@ -31,7 +31,6 @@ class Images(Resource):
                                             category,
                                             image,
                                         )
-                                        print(1212, image_path)
                                         if category == "index":
                                             person_dict["index"] = image_path
                                         elif category == "urls":
@@ -52,10 +51,20 @@ class Images(Resource):
                                         tag,
                                         image,
                                     )
-                                    print(1212, image)
                                     tag_images.append(image_path)
                         tags_image[tag] = tag_images
-                return jsonify({"albums": albums, "tags_image": tags_image})
+                        
+                banner_directory = os.path.join(target_directory, "banner")
+                banners=[]
+                for banner in os.listdir(banner_directory):
+                    # path = os.path.join(tags_directory, banner)
+                    image_path = os.path.join(
+                                        "https://facei.top/static/allImages/banner",
+                                        banner,
+                                    )
+                    banners.append(image_path)
+                return jsonify({
+                    "albums": albums, "tags_image": tags_image,'banners':banners})
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
         else:
