@@ -93,11 +93,14 @@ def save_image_to_sql(request):
                     record.request_status = request.get("status")
                     record.befor_process_time = request.get("befor_process_time")
                     record.process_time = request.get("process_time")
-                    if not records_user_info:
+                    if records_user_info:
                         for record_user in records_user_info:
                             record_user.points = record_user.points - 1
-                            record_user.finished_works.append(record.output_image_path)
-                            record_user.pending_works  = record_user.pending_works - 1
+                            if record_user.points < 0:
+                                record_user.points = 0
+                            # print("用户积分:", record_user.finished_works)
+                            # record_user.finished_works.append(record.output_image_path)
+                            # record_user.pending_works  = record_user.pending_works - 1
                 # 提交更新到数据库
                 db.commit()
                 print("输出图像成功")

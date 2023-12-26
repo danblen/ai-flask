@@ -45,8 +45,8 @@ class UserInfo(Base):
     history_operations = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
     last_login_at = Column(DateTime)
-    finished_works = Column(ARRAY(String))  # 存放已完成作品的 URL，你也可以使用其他方式存储
-    pending_works = Column(Integer)
+    # finished_works = Column(String, default="[]")  # 存放已完成作品的 URL，你也可以使用其他方式存储
+    # pending_works = Column(String, default="[]")
     is_check = Column(String)
 
 

@@ -87,6 +87,8 @@ class WechatLogin(Resource):
                 points=5,
                 is_check="False",
                 created_at=datetime.now(),
+                # finished_works=[],
+                # pending_works=[],
             )
             db.add(default_user)
             db.commit()
@@ -98,8 +100,8 @@ class WechatLogin(Resource):
                 "history_operations": user.history_operations,
                 "created_at": user.created_at,
                 "last_login_at": user.last_login_at,
-                "finished_works": user.finished_works,
-                "pending_works": user.pending_works,
+                # "finished_works": user.finished_works,
+                # "pending_works": user.pending_works,
                 "is_check": user.is_check,
             }
             response_data = {"code": 200, "session_key": session_key, "data": user_info}
@@ -156,8 +158,8 @@ class Works(Resource):
                 "history_operations": user.history_operations,
                 "created_at": user.created_at,
                 "last_login_at": user.last_login_at,
-                "finished_works": user.finished_works,
-                "pending_works": user.pending_works,
+                # "finished_works": user.finished_works,
+                # "pending_works": user.pending_works,
                 "is_check": user.is_check,
             }
             response_data = {"code": 200, works:{}}

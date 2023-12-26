@@ -8,3 +8,4 @@ user-data.db
 static
 .vscode
 nohup.out
+config/
