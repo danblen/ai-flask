@@ -43,8 +43,8 @@ class UserInfo(Base):
         default=0,
     )
     history_operations = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    last_login_at = Column(DateTime)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(pytz.timezone('Asia/Shanghai')))
+    last_login_at = Column(DateTime(timezone=True), default=lambda: datetime.now(pytz.timezone('Asia/Shanghai')))
     # finished_works = Column(String, default="[]")  # 存放已完成作品的 URL，你也可以使用其他方式存储
     # pending_works = Column(String, default="[]")
     is_check = Column(String)

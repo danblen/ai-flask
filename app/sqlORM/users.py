@@ -84,9 +84,8 @@ class WechatLogin(Resource):
             # 用户不存在，创建新用户
             default_user = UserInfo(
                 user_id=openid,
-                points=5,
+                points=20,
                 is_check="False",
-                created_at=datetime.now(),
                 # finished_works=[],
                 # pending_works=[],
             )
@@ -98,8 +97,6 @@ class WechatLogin(Resource):
                 "user_id": user.user_id,
                 "points": user.points,
                 "history_operations": user.history_operations,
-                "created_at": user.created_at,
-                "last_login_at": user.last_login_at,
                 # "finished_works": user.finished_works,
                 # "pending_works": user.pending_works,
                 "is_check": user.is_check,
@@ -114,7 +111,6 @@ class WechatLogin(Resource):
                 "user_id": user.user_id,
                 "points": user.points,
                 "history_operations": user.history_operations,
-                "created_at": str(user.created_at),
                 # "last_login_at": user.last_login_at,
                 # "finished_works": user.finished_works,
                 # "pending_works": user.pending_works,
@@ -129,63 +125,63 @@ class WechatLogin(Resource):
         # 返回处理后的用户信息
         return response_data
 
-class Works(Resource):
-    def get(self):
-        db = SessionLocal()
-        parser = reqparse.RequestParser()
-        parser.add_argument(
-            "user_id", required=True, type=str, help="Code cannot be blank"
-        )
-        args = parser.parse_args()
-        user_id = args["user_id"]
+# class Works(Resource):
+#     def get(self):
+#         db = SessionLocal()
+#         parser = reqparse.RequestParser()
+#         parser.add_argument(
+#             "user_id", required=True, type=str, help="Code cannot be blank"
+#         )
+#         args = parser.parse_args()
+#         user_id = args["user_id"]
 
 
-        user = db.query(UserInfo).filter(UserInfo.user_id == user_id).first()
+#         user = db.query(UserInfo).filter(UserInfo.user_id == user_id).first()
 
-        if not user:
-            # 用户不存在，创建新用户
-            default_user = UserInfo(
-                user_id=openid,
-                points=5,
-                is_check="False",
-                created_at=datetime.now(),
-            )
-            # 获取刚刚创建的用户信息
-            user = db.query(UserInfo).filter(UserInfo.user_id == openid).first()
-            user_info = {
-                "user_id": user.user_id,
-                "points": user.points,
-                "history_operations": user.history_operations,
-                "created_at": user.created_at,
-                "last_login_at": user.last_login_at,
-                # "finished_works": user.finished_works,
-                # "pending_works": user.pending_works,
-                "is_check": user.is_check,
-            }
-            response_data = {"code": 200, works:{}}
-        else:
-            # 用户存在，更新用户信息
-            user.last_login_at = datetime.now()  # 更新最后登录时间为当前时间
-            db.commit()
-            # 构建可以被序列化的用户信息字典
-            user_info = {
-                "user_id": user.user_id,
-                "points": user.points,
-                "history_operations": user.history_operations,
-                "created_at": str(user.created_at),
-                # "last_login_at": user.last_login_at,
-                # "finished_works": user.finished_works,
-                # "pending_works": user.pending_works,
-                "is_check": user.is_check,
-            }
-            response_data = {
-                "code": 200,
-                "session_key": session_key,
-                "data": user_info,
-            }
+#         if not user:
+#             # 用户不存在，创建新用户
+#             default_user = UserInfo(
+#                 user_id=openid,
+#                 points=5,
+#                 is_check="False",
+#                 created_at=str(datetime.now()),
+#             )
+#             # 获取刚刚创建的用户信息
+#             user = db.query(UserInfo).filter(UserInfo.user_id == openid).first()
+#             user_info = {
+#                 "user_id": user.user_id,
+#                 "points": user.points,
+#                 "history_operations": user.history_operations,
+#                 "created_at": user.created_at,
+#                 # "last_login_at": user.last_login_at,
+#                 # "finished_works": user.finished_works,
+#                 # "pending_works": user.pending_works,
+#                 "is_check": user.is_check,
+#             }
+#             response_data = {"code": 200, works:{}}
+#         else:
+#             # 用户存在，更新用户信息
+#             # user.last_login_at = datetime.now()  # 更新最后登录时间为当前时间
+#             db.commit()
+#             # 构建可以被序列化的用户信息字典
+#             user_info = {
+#                 "user_id": user.user_id,
+#                 "points": user.points,
+#                 "history_operations": user.history_operations,
+#                 "created_at": user.created_at.isoformat(),
+#                 # "last_login_at": user.last_login_at,
+#                 # "finished_works": user.finished_works,
+#                 # "pending_works": user.pending_works,
+#                 "is_check": user.is_check,
+#             }
+#             response_data = {
+#                 "code": 200,
+#                 "session_key": session_key,
+#                 "data": user_info,
+#             }
 
-        # 返回处理后的用户信息
-        return response_data
+#         # 返回处理后的用户信息
+#         return response_data
 class User(Resource):
     def get(self, user_id):
         try:
