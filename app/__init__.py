@@ -3,7 +3,7 @@ from werkzeug.utils import secure_filename
 import os, re
 from flask_restful import Api
 from app.resources.user import User,WechatLogin
-from app.resources.images import Images
+# from app.resources.images import Images
 from pymongo import MongoClient
 
 app = Flask(__name__)

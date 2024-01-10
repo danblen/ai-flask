@@ -4,7 +4,7 @@ import os
 
 static_directory = "/home/ubuntu/code/ai-flask/static/"
 
-class Images(Resource):
+class GetAllImages(Resource):
     def get(self):
         target_directory = os.path.join(static_directory, "allImages")
         albums_directory = os.path.join(target_directory, "albums")

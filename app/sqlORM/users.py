@@ -32,14 +32,14 @@ def serialize_query_result(result, model):
 class Users(Resource):
     def post(self):
         try:
-            parser = reqparse.RequestParser()
-            # parser.add_argument(
-            #     "code", required=True, type=str, help="Code cannot be blank"
-            # )
-            query = parser.parse_args()
+            data = request.json
 
+            filters = []
+            for key, value in data.items():
+                filters.append(getattr(UserInfo, key) == value)
             # 查询用户信息
-            result = db.query(UserInfo).filter_by(**query).first()
+            result = db.query(UserInfo).filter(*filters).first()
+            # result = db.query(UserInfo).filter_by(**query).first()
 
             # 判断查询结果
             if result:

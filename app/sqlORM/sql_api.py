@@ -3,6 +3,7 @@ from .database import SessionLocal
 from .sql_model import UserSqlData, UserInfo
 from sqlalchemy.orm import Session, attributes
 from sqlalchemy.orm import class_mapper
+from sqlalchemy import delete, or_, func
 from .sql_model import PhotoImage
 from PIL import Image
 import os
@@ -284,7 +285,6 @@ def find_images_in_directory(directory, db: Session):
 
 def query_sql_data_by_dict(query: dict):
     db = SessionLocal()
-    print("query_sql_data_by_dict", query)
     try:
         # 构建查询条件
         filters = []
@@ -295,7 +295,7 @@ def query_sql_data_by_dict(query: dict):
         query_result = db.query(UserSqlData).filter(*filters).all()
 
         if not query_result:
-            print("没有找到数据", query_result)
+            print("当前用户没有作品", query_result)
             db.close()
             return None
 
@@ -365,6 +365,77 @@ def queue_query_result(query: dict):
         save_image_to_sql(response)
     return response
 
+def delete_all_images_by_user_id(query: dict):
+    db = SessionLocal()
+    try:
+        user_id = query.get("user_id")
+        # 获取所有需要删除的文件路径
+        records = db.query(UserSqlData).filter(UserSqlData.user_id == user_id).all()
+
+        # 删除文件
+        for record in records:
+            if record and record.output_image_path:
+                file_path = record.output_image_path
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+            if record and record.roop_image_path:
+                file_path = record.roop_image_path
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+            if record and record.main_image_path:
+                file_path = record.main_image_path
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+        # 执行删除操作
+        delete_statement = delete(UserSqlData).where(UserSqlData.user_id == user_id)
+        db.execute(delete_statement)
+        db.commit()
+
+        return {"message": f"用户 {user_id} 的所有图像已删除"}
+    except Exception as e:
+        print("删除数据时发生错误：", str(e))
+        db.rollback()
+        return None
+    finally:
+        db.close()
+
+def delete_select_images_by_file_name(images_info: dict):
+    if not images_info:
+        return {"message": "没有要删除的数据。"}
+    db = SessionLocal()
+    try:
+        for image_info in images_info:
+            request_id = image_info.get("request_id")
+            if request_id:
+                # 查询数据库获取文件路径
+                record = db.query(UserSqlData).filter(UserSqlData.request_id == request_id).first()
+                # 删除文件
+                if record and record.output_image_path:
+                    file_path = record.output_image_path
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                if record and record.roop_image_path:
+                    file_path = record.roop_image_path
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                if record and record.main_image_path:
+                    file_path = record.main_image_path
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                # 删除数据库记录
+                db.query(UserSqlData).filter(UserSqlData.request_id == request_id).delete()
+
+        db.commit()
+
+        db.close()
+        return {"message": f" 选中图像已删除"}
+    except Exception as e:
+        print("删除数据时发生错误：", str(e))
+        db.rollback()
+        return None
+    finally:
+        db.close()
 # def query_finished_works(url: str):
 #     db = SessionLocal()
 #     try:
@@ -404,7 +475,6 @@ class QueryResultAPI(Resource):
 class QueryUserPcocessDataAPI(Resource):
     def post(self):
         data = request.json
-        print("QueryUserPcocessDataAPI", data)
         return query_sql_data_by_dict(data)
 
 
@@ -439,3 +509,17 @@ class QueryPhotoImagesAPI(Resource):
         data = request.json
         print("QueryPhotoImagesAPI", data)
         return query_photo_image_sql_data_by_dict(data)
+
+class DeleteAllImages(Resource):
+    def post(self):
+        data = request.json
+        print("DeleteAllImages",data)
+        delete_all_images_by_user_id(data)
+        return {"suceess": "DeleteAllImages"}, 200
+
+class DeleteSelectImages(Resource):
+    def post(self):
+        data = request.json
+        print("DeleteSelectImages",data)
+        delete_select_images_by_file_name(data)
+        return {"suceess": "DeleteAllImages"}, 200
