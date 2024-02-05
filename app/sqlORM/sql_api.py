@@ -373,19 +373,19 @@ def delete_all_images_by_user_id(query: dict):
         records = db.query(UserSqlData).filter(UserSqlData.user_id == user_id).all()
 
         # 删除文件
-        for record in records:
-            if record and record.output_image_path:
-                file_path = record.output_image_path
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-            if record and record.roop_image_path:
-                file_path = record.roop_image_path
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-            if record and record.main_image_path:
-                file_path = record.main_image_path
-                if os.path.exists(file_path):
-                    os.remove(file_path)
+        # for record in records:
+        #     if record and record.output_image_path:
+        #         file_path = record.output_image_path
+        #         if os.path.exists(file_path):
+        #             os.remove(file_path)
+        #     if record and record.roop_image_path:
+        #         file_path = record.roop_image_path
+        #         if os.path.exists(file_path):
+        #             os.remove(file_path)
+        #     if record and record.main_image_path:
+        #         file_path = record.main_image_path
+        #         if os.path.exists(file_path):
+        #             os.remove(file_path)
 
         # 执行删除操作
         delete_statement = delete(UserSqlData).where(UserSqlData.user_id == user_id)
@@ -411,18 +411,18 @@ def delete_select_images_by_file_name(images_info: dict):
                 # 查询数据库获取文件路径
                 record = db.query(UserSqlData).filter(UserSqlData.request_id == request_id).first()
                 # 删除文件
-                if record and record.output_image_path:
-                    file_path = record.output_image_path
-                    if os.path.exists(file_path):
-                        os.remove(file_path)
-                if record and record.roop_image_path:
-                    file_path = record.roop_image_path
-                    if os.path.exists(file_path):
-                        os.remove(file_path)
-                if record and record.main_image_path:
-                    file_path = record.main_image_path
-                    if os.path.exists(file_path):
-                        os.remove(file_path)
+                # if record and record.output_image_path:
+                #     file_path = record.output_image_path
+                #     if os.path.exists(file_path):
+                #         os.remove(file_path)
+                # if record and record.roop_image_path:
+                #     file_path = record.roop_image_path
+                #     if os.path.exists(file_path):
+                #         os.remove(file_path)
+                # if record and record.main_image_path:
+                #     file_path = record.main_image_path
+                #     if os.path.exists(file_path):
+                #         os.remove(file_path)
                 # 删除数据库记录
                 db.query(UserSqlData).filter(UserSqlData.request_id == request_id).delete()
 
