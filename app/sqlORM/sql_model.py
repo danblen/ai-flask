@@ -10,12 +10,14 @@ from sqlalchemy import (
     func,
     Boolean,
 )
-from .database import Base
 from sqlalchemy import event
 from datetime import datetime
 from sqlalchemy.orm import sessionmaker
 import pytz
+from sqlalchemy.ext.declarative import declarative_base
 
+
+Base = declarative_base()
 
 class UserSqlData(Base):
     __tablename__ = "user_process_image_data"
@@ -33,6 +35,7 @@ class UserSqlData(Base):
     image_type = Column(String)
     request_id = Column(String, unique=True, primary_key=True)
     request_status = Column(String, default="no-data")
+    user_like_status = Column(Integer, default=0)
 
 
 class UserInfo(Base):
@@ -40,14 +43,14 @@ class UserInfo(Base):
     user_id = Column(String, primary_key=True, index=True)
     points = Column(
         Integer,
-        default=0,
+        default=20,
     )
     history_operations = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(pytz.timezone('Asia/Shanghai')))
     last_login_at = Column(DateTime(timezone=True), default=lambda: datetime.now(pytz.timezone('Asia/Shanghai')))
     # finished_works = Column(String, default="[]")  # 存放已完成作品的 URL，你也可以使用其他方式存储
     # pending_works = Column(String, default="[]")
-    is_check = Column(String)
+    is_check = Column(Integer, default=0)
 
 
 class PhotoImage(Base):

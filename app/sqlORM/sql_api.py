@@ -1,6 +1,6 @@
-from .database import engine, Base
+from .database import engine
 from .database import SessionLocal
-from .sql_model import UserSqlData, UserInfo
+from .sql_model import UserSqlData, UserInfo, Base
 from sqlalchemy.orm import Session, attributes
 from sqlalchemy.orm import class_mapper
 from sqlalchemy import delete, or_, func
@@ -436,6 +436,30 @@ def delete_select_images_by_file_name(images_info: dict):
         return None
     finally:
         db.close()
+
+def update_user_process_info_by_dict(data: dict):
+    db = SessionLocal()
+    try:
+        request_id = data.get("request_id")
+
+        records = db.query(UserSqlData).filter(UserSqlData.request_id == request_id).all()
+        if records:
+            for record in records:
+                for key, value in data.items():
+                    # 检查数据库模型中是否存在与data中键对应的属性
+                    if hasattr(record, key):
+                        setattr(record, key, value)
+
+            db.commit()
+            return {"success": "UpdateUserProcessInfo"}, 200
+        else:
+            print(f"No records found for request_id: {request_id}")
+            return {"success": "No records found for request_id"}, 200
+    except Exception as e:
+        print("update_user_process_info_by_dict 更新数据时发生错误:", str(e))
+        return {"error": "Exception error" + str(e)}, 500
+    finally:
+        db.close()
 # def query_finished_works(url: str):
 #     db = SessionLocal()
 #     try:
@@ -477,33 +501,6 @@ class QueryUserPcocessDataAPI(Resource):
         data = request.json
         return query_sql_data_by_dict(data)
 
-
-    # try:
-    #     # 构建查询条件
-    #     filters = []
-    #     for key, value in query.items():
-    #         filters.append(getattr(UserSqlData, key) == value)
-
-    #     # 执行查询
-    #     query_result = db.query(UserSqlData).filter(*filters).all()
-
-    #     if not query_result:
-    #         print("没有找到数据", query_result)
-    #         db.close()
-    #         return None
-
-    #     serialized_result = serialize_query_result(query_result, UserSqlData)
-
-    #     db.close()
-    #     return serialized_result
-    # except Exception as e:
-    #     # 处理数据库查询错误
-    #     print("查询数据时发生错误：", str(e))
-    #     db.close()
-    #     raise(e)
-    #     return None
-
-
 class QueryPhotoImagesAPI(Resource):
     def post(self):
         data = request.json
@@ -523,3 +520,8 @@ class DeleteSelectImages(Resource):
         print("DeleteSelectImages",data)
         delete_select_images_by_file_name(data)
         return {"suceess": "DeleteAllImages"}, 200
+
+class UpdateUserProcessInfo(Resource):
+    def post(self):
+        data = request.json
+        return update_user_process_info_by_dict(data)

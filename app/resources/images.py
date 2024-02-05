@@ -9,6 +9,7 @@ class GetAllImages(Resource):
         target_directory = os.path.join(static_directory, "allImages")
         albums_directory = os.path.join(target_directory, "albums")
         tags_directory = os.path.join(target_directory, "tags")
+        activity_tags_directory = os.path.join(target_directory, "activity_tags")
 
         if os.path.exists(albums_directory) and os.path.isdir(albums_directory):
             try:
@@ -53,6 +54,24 @@ class GetAllImages(Resource):
                                     )
                                     tag_images.append(image_path)
                         tags_image[tag] = tag_images
+                
+                activity_tags_image = {}
+                for tag in os.listdir(activity_tags_directory):
+                    tag_path = os.path.join(activity_tags_directory, tag)
+                    if os.path.isdir(tag_path):
+                        tag_images = []
+                        if os.path.isdir(tag_path):
+                            for image in os.listdir(tag_path):
+                                if image.lower().endswith(
+                                    (".png", ".jpg", ".jpeg", ".gif", ".bmp")
+                                ):
+                                    image_path = os.path.join(
+                                        "https://facei.top/static/allImages/activity_tags",
+                                        tag,
+                                        image,
+                                    )
+                                    tag_images.append(image_path)
+                        activity_tags_image[tag] = tag_images
                         
                 banner_directory = os.path.join(target_directory, "banner")
                 banners=[]
@@ -64,7 +83,7 @@ class GetAllImages(Resource):
                                     )
                     banners.append(image_path)
                 return jsonify({
-                    "albums": albums, "tags_image": tags_image,'banners':banners})
+                    "albums": albums, "tags_image": tags_image,'banners':banners,"activity_tags_image":activity_tags_image})
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
         else:

@@ -85,7 +85,7 @@ class WechatLogin(Resource):
             default_user = UserInfo(
                 user_id=openid,
                 points=20,
-                is_check="False",
+                is_check=0,
                 # finished_works=[],
                 # pending_works=[],
             )
@@ -124,6 +124,39 @@ class WechatLogin(Resource):
 
         # 返回处理后的用户信息
         return response_data
+
+def update_user_info_by_dict(data: dict):
+    db = SessionLocal()
+    try:
+        user_id = data.get("user_id")
+
+        user = db.query(UserInfo).filter(UserInfo.user_id == user_id).first()
+        if user:
+            for key, value in data.items():
+                # 检查数据库模型中是否存在与data中键对应的属性
+                if hasattr(user, key):
+                    setattr(user, key, value)
+
+            db.commit()
+            user_info = {
+                "user_id": user.user_id,
+                "points": user.points,
+                "history_operations": user.history_operations,
+                # "last_login_at": user.last_login_at,
+                # "created_at": user.created_at,
+                # "finished_works": user.finished_works,
+                # "pending_works": user.pending_works,
+                "is_check": user.is_check,
+            }
+            return user_info, 200
+        else:
+            print(f"No records found for user_id: {user_id}")
+            return {"success": "No records found for user_id"}, 200
+    except Exception as e:
+        print("update_user_info_by_dict 更新数据时发生错误:", str(e))
+        return {"error": "Exception error" + str(e)}, 500
+    finally:
+        db.close()
 
 # class Works(Resource):
 #     def get(self):
@@ -196,3 +229,9 @@ class User(Resource):
             return user_json, 200
         else:
             return {"message": "User not found"}, 404
+
+class UpdateUserInfo(Resource):
+    def post(self):
+        data = request.json
+        print("UpdateUserInfo",data)
+        return update_user_info_by_dict(data)

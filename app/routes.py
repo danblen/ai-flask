@@ -5,8 +5,8 @@ from flask_restful import Api
 from app.resources.images import GetAllImages
 from app.sqlORM.sql_api import QueueProcessAPI, QueryResultAPI
 from app.sqlORM.sql_api import QueryUserPcocessDataAPI, QueryPhotoImagesAPI 
-from app.sqlORM.sql_api import DeleteAllImages, DeleteSelectImages
-from app.sqlORM.users import WechatLogin, Users
+from app.sqlORM.sql_api import DeleteAllImages, DeleteSelectImages, UpdateUserProcessInfo
+from app.sqlORM.users import WechatLogin, Users, UpdateUserInfo
 
 api = Api(app)
 
@@ -21,3 +21,5 @@ api.add_resource(QueryResultAPI, "/query-result")
 api.add_resource(Users, "/users",endpoint='users')
 api.add_resource(QueryUserPcocessDataAPI, "/query-user-process-data")
 api.add_resource(QueryPhotoImagesAPI, "/query-photo-images")
+api.add_resource(UpdateUserProcessInfo, "/update-user-process-info")
+api.add_resource(UpdateUserInfo, "/update-user-info")
